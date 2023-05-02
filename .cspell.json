@@ -1,0 +1,21 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "dictionaries": ["typescript", "html"],
+  "ignorePaths": ["public/locales/*", "src/database/migrations/*"],
+  "words": [
+    "autodocs",
+    "autotranslate",
+    "chartjs",
+    "codecov",
+    "commitlint",
+    "dto",
+    "mantine",
+    "nextjs",
+    "nprogress",
+    "pino",
+    "swr",
+    "tabler",
+    "typeorm"
+  ]
+}

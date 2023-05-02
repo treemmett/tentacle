@@ -1,0 +1,75 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "airbnb",
+    "airbnb/hooks",
+    "plugin:@typescript-eslint/recommended",
+    "next",
+    "prettier"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint", "prettier"],
+  "root": true,
+  "rules": {
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "jsx": "never",
+        "ts": "never",
+        "tsx": "never"
+      }
+    ],
+    "@next/next/no-img-element": "off",
+    "@typescript-eslint/lines-between-class-members": "error",
+    "@typescript-eslint/no-shadow": "error",
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-use-before-define": "error",
+    "@typescript-eslint/no-useless-constructor": 2,
+    "lines-between-class-members": "off",
+    "import/no-unresolved": ["error", { "ignore": ["budget"] }],
+    "import/order": ["error", { "alphabetize": { "order": "asc" } }],
+    "import/prefer-default-export": "off",
+    "jsx-a11y/no-autofocus": 0,
+    "no-bitwise": ["error", { "allow": ["~"] }],
+    "no-shadow": "off",
+    "no-use-before-define": 0,
+    "no-useless-constructor": 0,
+    "prettier/prettier": "error",
+    "react/button-has-type": "off",
+    "react/function-component-definition": ["error", { "namedComponents": "arrow-function" }],
+    "react/jsx-filename-extension": ["error", { "extensions": [".tsx", ".jsx"] }],
+    "react/jsx-props-no-spreading": "off",
+    "react/jsx-sort-props": ["error", { "shorthandLast": true }],
+    "react/no-unescaped-entities": "off",
+    "react/prop-types": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/require-default-props": "off",
+    "sort-keys": ["error", "asc", { "natural": true }],
+    "class-methods-use-this": "off"
+  },
+  "overrides": [
+    {
+      "files": ["next*.js", "i18next-parser.config.ts"],
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off"
+      }
+    },
+    {
+      "files": [
+        "jest.*.ts",
+        "**/*.spec.ts",
+        "**/*.spec.tsx",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "i18next-parser.config.ts",
+        "playwright.config.ts"
+      ],
+      "rules": {
+        "import/no-extraneous-dependencies": ["error", { "devDependencies": true }],
+        "no-await-in-loop": "off"
+      }
+    }
+  ]
+}
