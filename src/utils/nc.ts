@@ -2,6 +2,7 @@ import { errors, isCelebrateError } from 'celebrate';
 import { compactDecrypt } from 'jose';
 import { NextApiRequest, NextApiResponse } from 'next';
 import nextConnect, { Middleware } from 'next-connect';
+import { Octokit } from 'octokit';
 import { Config } from './config';
 import { connectToDatabase } from './dataSource';
 import { APIError, AuthorizationError } from './errors';
@@ -11,7 +12,7 @@ const celebrateErrorHandler = errors();
 export type ApiMiddleware = Middleware<NextApiRequest, NextApiResponse>;
 
 export interface AuthenticatedRequest extends NextApiRequest {
-  token: string;
+  octokit: Octokit;
 }
 
 export function nc<Req extends NextApiRequest, Res extends NextApiResponse>() {
@@ -49,7 +50,8 @@ export function authenticatedNC() {
 
     try {
       const { plaintext } = await compactDecrypt(accessToken, Config.TOKEN_KEY);
-      req.token = JSON.parse(new TextDecoder().decode(plaintext)).token;
+      const { token } = JSON.parse(new TextDecoder().decode(plaintext));
+      req.octokit = new Octokit({ auth: token });
       next();
     } catch (err) {
       console.error(err);
