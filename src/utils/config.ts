@@ -1,3 +1,4 @@
+import { createSecretKey, randomBytes } from 'crypto';
 import { PublicConfig } from './publicConfig';
 
 export class Config extends PublicConfig {
@@ -18,4 +19,8 @@ export class Config extends PublicConfig {
   public static readonly GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET as string;
 
   public static readonly GITHUB_PRIVATE_KEY = process.env.GITHUB_PRIVATE_KEY as string;
+
+  public static readonly TOKEN_KEY = createSecretKey(
+    process.env.TOKEN_KEY ? Buffer.from(process.env.TOKEN_KEY, 'hex') : randomBytes(32)
+  );
 }

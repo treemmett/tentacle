@@ -1,6 +1,6 @@
 import { Joi, celebrate } from 'celebrate';
+import { CompactEncrypt } from 'jose';
 import { App } from 'octokit';
-import { GitHubUserToken } from '@/entities/GitHubUserToken';
 import { Config } from '@/utils/config';
 import { nc } from '@/utils/nc';
 
@@ -20,19 +20,16 @@ export default nc().post(
     },
   }),
   async (req, res) => {
-    const response = await GithubApp.oauth.createToken({
+    const { authentication } = await GithubApp.oauth.createToken({
       code: req.body.code,
     });
 
-    if (!('refreshToken' in response.authentication)) {
-      throw new Error('Authentication missing refresh token');
-    }
+    const token = await new CompactEncrypt(
+      new TextEncoder().encode(JSON.stringify({ token: authentication.token }))
+    )
+      .setProtectedHeader({ alg: 'A256KW', enc: 'A256GCM' })
+      .encrypt(Config.TOKEN_KEY);
 
-    const token = new GitHubUserToken();
-    token.refreshToken = response.authentication.refreshToken;
-    token.refreshTokenExpiration = new Date(response.authentication.refreshTokenExpiresAt);
-    await GitHubUserToken.insert(token);
-
-    res.send(token);
+    res.send({ token });
   }
 );

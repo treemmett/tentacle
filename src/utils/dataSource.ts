@@ -3,11 +3,10 @@ import { resolve } from 'path';
 import { DataSource } from 'typeorm';
 import { Config } from './config';
 import type { ApiMiddleware } from './nc';
-import { GitHubUserToken } from '@/entities/GitHubUserToken';
 
 export const AppDataSource = new DataSource({
   database: Config.DB_DATABASE,
-  entities: [GitHubUserToken],
+  entities: [],
   host: Config.DB_HOST,
   migrations: [resolve(__dirname, './migrations/**')],
   password: Config.DB_PASSWORD,
