@@ -1,8 +1,11 @@
 import { Button, Flex, Header as MantineHeader } from '@mantine/core';
 import { FC, useCallback } from 'react';
+import { useUser } from '@/lib/user';
 import { PublicConfig } from '@/utils/publicConfig';
 
 export const Header: FC = () => {
+  const { checkToken, loggedIn, logout } = useUser();
+
   const openOAuth = useCallback(() => {
     const popup = window.open(
       `https://github.com/login/oauth/authorize?client_id=${PublicConfig.GITHUB_CLIENT_ID}`,
@@ -17,15 +20,16 @@ export const Header: FC = () => {
     const intervalId = setInterval(async () => {
       if (popup.closed) {
         clearInterval(intervalId);
+        checkToken();
       }
     });
-  }, []);
+  }, [checkToken]);
 
   return (
     <MantineHeader height={60}>
       <Flex align="center" h="100%" px="sm">
-        <Button ml="auto" onClick={openOAuth} variant="outline">
-          Login
+        <Button ml="auto" onClick={loggedIn ? logout : openOAuth} variant="outline">
+          {loggedIn ? 'Logout' : 'Login'}
         </Button>
       </Flex>
     </MantineHeader>

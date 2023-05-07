@@ -16,8 +16,9 @@ const GitHubLogin: NextPage = () => {
         method: 'POST',
       })
         .then((r) => r.json())
-        .then((user) => {
-          console.log(user);
+        .then(({ token }) => {
+          localStorage.setItem('accessToken', token);
+          window.close();
         });
     }
   }, [query.code]);
