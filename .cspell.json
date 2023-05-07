@@ -16,6 +16,7 @@
     "pino",
     "swr",
     "tabler",
-    "typeorm"
+    "typeorm",
+    "vercel"
   ]
 }
