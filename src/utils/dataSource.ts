@@ -3,11 +3,12 @@ import { resolve } from 'path';
 import { DataSource } from 'typeorm';
 import { Config } from './config';
 import type { ApiMiddleware } from './nc';
+import { VercelCheck } from '@/entities/VercelCheck';
 import { VercelInstallation } from '@/entities/VercelIntegration';
 
 export const AppDataSource = new DataSource({
   database: Config.DB_DATABASE,
-  entities: [VercelInstallation],
+  entities: [VercelCheck, VercelInstallation],
   host: Config.DB_HOST,
   migrations: [resolve(__dirname, './migrations/**')],
   password: Config.DB_PASSWORD,

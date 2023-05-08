@@ -3,9 +3,11 @@ import { compactDecrypt } from 'jose';
 import { NextApiRequest, NextApiResponse } from 'next';
 import nextConnect, { Middleware } from 'next-connect';
 import { Octokit } from 'octokit';
+import logHttp, { Options } from 'pino-http';
 import { Config } from './config';
 import { connectToDatabase } from './dataSource';
 import { APIError, AuthorizationError } from './errors';
+import { logger } from './logger';
 
 const celebrateErrorHandler = errors();
 
@@ -18,6 +20,8 @@ export interface AuthenticatedRequest extends NextApiRequest {
 export function nc<Req extends NextApiRequest, Res extends NextApiResponse>() {
   return nextConnect<Req, Res>({
     onError: (err, req, res, next) => {
+      logger.error(err);
+
       if (isCelebrateError(err)) {
         celebrateErrorHandler(err, req, res, next);
         return;
@@ -32,7 +36,9 @@ export function nc<Req extends NextApiRequest, Res extends NextApiResponse>() {
 
       res.status(500).send({ error: err });
     },
-  }).use(connectToDatabase);
+  })
+    .use(logHttp({ logger } as Options))
+    .use(connectToDatabase);
 }
 
 export function authenticatedNC() {
