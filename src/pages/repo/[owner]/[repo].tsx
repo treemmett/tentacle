@@ -6,37 +6,68 @@ import { FC } from 'react';
 import { useRepo } from '@/lib/repos';
 import type { GetRepoWorkflows } from '@/pages/api/repo/[owner]/[repo]';
 
+const Workflow: FC<{ workflow: GetRepoWorkflows[0] }> = ({ workflow }) => {
+  const { query } = useRouter();
+
+  if (workflow.error) {
+    return (
+      <Paper align="center" component={Flex} mb="sm" p="md" shadow="xs" withBorder>
+        <Text>{workflow.name}</Text>
+        <Badge color="red" ml="auto" size="sm">
+          {workflow.error}
+        </Badge>
+      </Paper>
+    );
+  }
+
+  if (!workflow.supported) {
+    return (
+      <Paper align="center" component={Flex} mb="sm" p="md" shadow="xs" withBorder>
+        <Text>{workflow.name}</Text>
+        <Badge color="gray" ml="auto" size="sm">
+          <Text inherit>
+            Missing{' '}
+            <Code color="gray" sx={{ fontSize: '0.6rem' }}>
+              repository_dispatch
+            </Code>{' '}
+            trigger.
+          </Text>
+        </Badge>
+      </Paper>
+    );
+  }
+
+  return (
+    <Paper
+      component={Link}
+      display="flex"
+      href={{
+        pathname: '/repo/[owner]/[repo]/[workflow]',
+        query: {
+          ...query,
+          workflow: workflow.name,
+        },
+      }}
+      mb="sm"
+      p="md"
+      shadow="xs"
+      sx={{ alignItems: 'center' }}
+      withBorder
+    >
+      <Text>{workflow.name}</Text>
+      <Badge color="green" ml="auto" size="sm">
+        Setup
+      </Badge>
+    </Paper>
+  );
+};
+
 const List: FC<{ workflows: GetRepoWorkflows }> = ({ workflows }) =>
   workflows.length ? (
     <>
-      {workflows.map((r) => {
-        const color = r.supported ? 'green' : 'gray';
-
-        return (
-          <Paper align="center" component={Flex} key={r.name} mb="sm" p="md" shadow="xs" withBorder>
-            <Text>{r.name}</Text>
-            {r.error ? (
-              <Badge color="red" size="sm">
-                {r.error}
-              </Badge>
-            ) : (
-              <Badge color={color} ml="auto" size="sm">
-                {r.supported ? (
-                  'Setup'
-                ) : (
-                  <Text inherit>
-                    Missing{' '}
-                    <Code color="gray" sx={{ fontSize: '0.6rem' }}>
-                      repository_dispatch
-                    </Code>{' '}
-                    trigger.
-                  </Text>
-                )}
-              </Badge>
-            )}
-          </Paper>
-        );
-      })}
+      {workflows.map((r) => (
+        <Workflow key={r.name} workflow={r} />
+      ))}
     </>
   ) : (
     <Center my="lg">Repository has no workflows :(</Center>
