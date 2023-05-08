@@ -1,4 +1,5 @@
-import { Box, Button, Text, Title } from '@mantine/core';
+import { Box, Button, Group, Text, Title } from '@mantine/core';
+import { IconBrandVercel } from '@tabler/icons-react';
 import { NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -27,18 +28,31 @@ const Workflow: NextPage = () => {
           ← Back to repo
         </Text>
       </Box>
-      <Button
-        onClick={() =>
-          api(
-            'POST',
-            `/repo/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(
-              workflow
-            )}`
-          )
-        }
-      >
-        Run Now
-      </Button>
+
+      <Group>
+        <Button
+          onClick={() =>
+            api(
+              'POST',
+              `/repo/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(
+                workflow
+              )}`
+            )
+          }
+        >
+          Run Now
+        </Button>
+
+        <Button
+          component="a"
+          href="https://vercel.com/integrations/tentacle/new"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <IconBrandVercel stroke={3} />
+          <Text ml="sm">Configure with Vercel</Text>
+        </Button>
+      </Group>
     </>
   );
 };

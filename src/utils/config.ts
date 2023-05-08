@@ -23,4 +23,10 @@ export class Config extends PublicConfig {
   public static readonly TOKEN_KEY = createSecretKey(
     process.env.TOKEN_KEY ? Buffer.from(process.env.TOKEN_KEY, 'hex') : randomBytes(32)
   );
+
+  public static readonly VERCEL_CLIENT_ID = process.env.VERCEL_CLIENT_ID as string;
+
+  public static readonly VERCEL_CLIENT_SECRET = process.env.VERCEL_CLIENT_SECRET as string;
+
+  public static readonly VERCEL_REDIRECT_URL = process.env.VERCEL_REDIRECT_URL as string;
 }
