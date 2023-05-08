@@ -5,6 +5,7 @@ import { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
+import { Navbar } from '@/components/Navbar';
 import { emotionCache } from '@/utils/emotion';
 
 const MyApp: FC<AppProps> = ({ Component, pageProps }) => {
@@ -30,7 +31,7 @@ const MyApp: FC<AppProps> = ({ Component, pageProps }) => {
         withNormalizeCSS
       >
         <Notifications position="bottom-center" />
-        <AppShell header={<Header />} hidden={!!asPath.match(/(^\/login)/)}>
+        <AppShell header={<Header />} hidden={!!asPath.match(/(^\/login)/)} navbar={<Navbar />}>
           <Component {...pageProps} />
         </AppShell>
       </MantineProvider>
