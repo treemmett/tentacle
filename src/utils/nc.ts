@@ -27,11 +27,10 @@ export function nc<Req extends NextApiRequest, Res extends NextApiResponse>() {
         res
           .status(err.status)
           .send({ error: { code: err.constructor.name, message: err.message, stack: err.stack } });
-      } else {
-        res
-          .status(500)
-          .send({ error: { code: 'UnknownError', message: 'Unknown error occurred' } });
+        return;
       }
+
+      res.status(500).send({ error: err });
     },
   }).use(connectToDatabase);
 }

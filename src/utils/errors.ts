@@ -12,3 +12,9 @@ export class AuthorizationError extends APIError {
     super(message, 400);
   }
 }
+
+export class RepositoryNotFoundError extends APIError {
+  constructor(public message = 'Repository not found') {
+    super(message, 404);
+  }
+}

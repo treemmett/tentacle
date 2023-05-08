@@ -1,5 +1,6 @@
 import { Box, Paper, Skeleton } from '@mantine/core';
 import { NextPage } from 'next';
+import Link from 'next/link';
 import { useRepos } from '@/lib/repos';
 
 const Page: NextPage = () => {
@@ -21,7 +22,7 @@ const Page: NextPage = () => {
   return (
     <>
       {repos.map((r) => (
-        <Paper key={r} mb="sm" p="md" shadow="xs" withBorder>
+        <Paper component={Link} href={`/repo/${r}`} key={r} mb="sm" p="md" shadow="xs" withBorder>
           {r}
         </Paper>
       ))}
