@@ -2,7 +2,7 @@ import { BaseEntity, Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } 
 import { v4 } from 'uuid';
 import { VercelInstallation } from './VercelIntegration';
 import type { CreatedWebhook, CreateCheckResponse } from '@/pages/api/vercel';
-import { APIError } from '@/utils/errors';
+import { APIError, IntegrationNotFoundError } from '@/utils/errors';
 import { logger } from '@/utils/logger';
 
 @Entity({ name: 'vercel_checks' })
@@ -32,7 +32,7 @@ export class VercelCheck extends BaseEntity {
       .getOne();
 
     if (!vercel) {
-      throw new APIError('No vercel installation found', 404);
+      throw new IntegrationNotFoundError('No vercel installation found');
     }
 
     const response = await fetch(

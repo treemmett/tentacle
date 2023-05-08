@@ -24,3 +24,15 @@ export class UnauthorizedError extends APIError {
     super(message, 403);
   }
 }
+
+export class IntegrationNotFoundError extends APIError {
+  constructor(public message = 'Integration not found') {
+    super(message, 404);
+  }
+}
+
+export class ProjectNotFound extends APIError {
+  constructor(public message = 'Project not found') {
+    super(message, 404);
+  }
+}
