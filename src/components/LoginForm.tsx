@@ -5,13 +5,13 @@ import { FC, useEffect } from 'react';
 import { useUser } from '@/lib/user';
 
 export const LoginForm: FC<ContextModalProps> = ({ context, id }) => {
-  const { loggedIn, openOAuth } = useUser();
+  const { user, openOAuth } = useUser();
 
   useEffect(() => {
-    if (loggedIn) {
+    if (user) {
       context.closeModal(id);
     }
-  }, [context, id, loggedIn]);
+  }, [context, id, user]);
 
   return (
     <Stack>

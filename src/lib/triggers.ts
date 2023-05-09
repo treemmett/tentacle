@@ -7,10 +7,11 @@ import { api } from '@/utils/apiClient';
 import { TRIGGERS } from '@/utils/cacheKeys';
 
 export function useTriggers() {
-  const { loggedIn } = useUser();
+  const { user } = useUser();
 
-  const { data, error, isLoading, mutate } = useSWR([loggedIn, TRIGGERS], () =>
-    api<GetTriggers>('GET', '/triggers')
+  const { data, error, isLoading, mutate } = useSWR(
+    () => (user ? [user.id, TRIGGERS] : null),
+    () => api<GetTriggers>('GET', '/triggers')
   );
 
   const createTrigger = useCallback(

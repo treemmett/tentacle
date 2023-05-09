@@ -8,18 +8,18 @@ import { api } from '@/utils/apiClient';
 
 const GitHubLogin: NextPage = () => {
   const { query } = useRouter();
-  const { loggedIn } = useUser();
+  const { user } = useUser();
 
   useEffect(() => {
-    if (query.code && loggedIn) {
+    if (query.code && user) {
       api('POST', '/login/oauth/vercel', { code: query.code }).then(() => {
         window.location.href = query.next as string;
       });
     }
-  }, [loggedIn, query.code, query.next]);
+  }, [user, query.code, query.next]);
 
   useEffect(() => {
-    if (!loggedIn) {
+    if (!user) {
       openContextModal({
         closeOnClickOutside: false,
         closeOnEscape: false,
@@ -29,7 +29,7 @@ const GitHubLogin: NextPage = () => {
         withCloseButton: false,
       });
     }
-  }, [loggedIn]);
+  }, [user]);
 
   return (
     <Center h="100dvh">

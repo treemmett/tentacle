@@ -3,13 +3,13 @@ import { FC } from 'react';
 import { useUser } from '@/lib/user';
 
 export const Header: FC = () => {
-  const { openOAuth, loggedIn, logout } = useUser();
+  const { openOAuth, user, logout } = useUser();
 
   return (
     <MantineHeader height={60}>
       <Flex align="center" h="100%" px="sm">
-        <Button ml="auto" onClick={loggedIn ? logout : openOAuth} variant="outline">
-          {loggedIn ? 'Logout' : 'Login'}
+        <Button ml="auto" onClick={user ? logout : openOAuth} variant="outline">
+          {user ? 'Logout' : 'Login'}
         </Button>
       </Flex>
     </MantineHeader>

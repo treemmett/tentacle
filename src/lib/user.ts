@@ -8,7 +8,6 @@ import { PublicConfig } from '@/utils/publicConfig';
 export function useUser() {
   const { data: user, mutate } = useSWR(USER, () => {
     if (!localStorage.getItem('accessToken')) return undefined;
-
     return api<User>('GET', '/user');
   });
 
@@ -47,7 +46,6 @@ export function useUser() {
 
   return {
     checkToken,
-    loggedIn: !!user,
     loggingIn,
     logout,
     openOAuth,

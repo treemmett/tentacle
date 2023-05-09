@@ -5,10 +5,11 @@ import { api } from '@/utils/apiClient';
 import { VERCEL } from '@/utils/cacheKeys';
 
 export function useVercel() {
-  const { loggedIn } = useUser();
+  const { user } = useUser();
 
-  const { data, error, isLoading } = useSWR([loggedIn, VERCEL], () =>
-    api<GetVercelProjects>('GET', '/vercel/projects')
+  const { data, error, isLoading } = useSWR(
+    () => (user ? [user.id, VERCEL] : null),
+    () => api<GetVercelProjects>('GET', '/vercel/projects')
   );
 
   return {

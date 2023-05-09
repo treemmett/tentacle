@@ -6,9 +6,12 @@ import { api } from '@/utils/apiClient';
 import { REPOS } from '@/utils/cacheKeys';
 
 export function useRepos() {
-  const { loggedIn } = useUser();
+  const { user } = useUser();
 
-  const { data, isLoading } = useSWR([loggedIn, REPOS], () => api<GetRepos>('GET', '/repos'));
+  const { data, isLoading } = useSWR(
+    () => (user ? [user.id, REPOS] : null),
+    () => api<GetRepos>('GET', '/repos')
+  );
 
   return {
     isLoading,
@@ -17,9 +20,9 @@ export function useRepos() {
 }
 
 export function useRepo(owner: string, repo: string) {
-  const { loggedIn } = useUser();
+  const { user } = useUser();
 
-  const { data, isLoading } = useSWR([loggedIn, REPOS, owner, repo], () =>
+  const { data, isLoading } = useSWR([user, REPOS, owner, repo], () =>
     api<GetRepoWorkflows>('GET', `/repo/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`)
   );
 
