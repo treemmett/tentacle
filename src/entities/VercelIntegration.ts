@@ -36,12 +36,18 @@ export class VercelIntegration extends BaseEntity {
   @JoinColumn()
   public user: User;
 
-  public async getProject(id: string): Promise<GetVercelProjects[0]> {
-    const response = await fetch(`https://api.vercel.com/v9/projects/${encodeURIComponent(id)}`, {
+  public fetch(url: string, init?: RequestInit) {
+    return fetch(`https://api.vercel.com${url}`, {
+      ...init,
       headers: {
         authorization: `Bearer ${this.accessToken}`,
+        ...init?.headers,
       },
     });
+  }
+
+  public async getProject(id: string): Promise<GetVercelProjects[0]> {
+    const response = await this.fetch(`/v9/projects/${encodeURIComponent(id)}`);
 
     if (response.status === 404) {
       throw new ProjectNotFound();
@@ -57,11 +63,7 @@ export class VercelIntegration extends BaseEntity {
   }
 
   public async getProjects(): Promise<GetVercelProjects> {
-    const response = await fetch('https://api.vercel.com/v9/projects', {
-      headers: {
-        authorization: `Bearer ${this.accessToken}`,
-      },
-    });
+    const response = await this.fetch('/v9/projects');
 
     if (!response.ok) {
       logger.error(await response.json(), 'Vercel request failed');

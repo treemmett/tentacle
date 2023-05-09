@@ -35,8 +35,8 @@ export class VercelCheck extends BaseEntity {
       throw new IntegrationNotFoundError('No vercel installation found');
     }
 
-    const response = await fetch(
-      `https://api.vercel.com/v1/deployments/${webhook.payload.deployment.id}/checks`,
+    const response = await vercel.fetch(
+      `/v1/deployments/${encodeURIComponent(webhook.payload.deployment.id)}/checks`,
       {
         body: JSON.stringify({
           blocking: true,
@@ -45,10 +45,6 @@ export class VercelCheck extends BaseEntity {
           name: 'Tentacle Checks',
           rerequestable: true,
         }),
-        headers: {
-          Authorization: `Bearer ${vercel.accessToken}`,
-          'content-type': 'application/json',
-        },
         method: 'POST',
       }
     );
@@ -70,14 +66,13 @@ export class VercelCheck extends BaseEntity {
 
   public async updateCheck(succeeded: boolean) {
     logger.trace(this, 'Updating checks');
-    const response = await fetch(
-      `https://api.vercel.com/v1/deployments/${this.deploymentId}/checks/${this.checkId}`,
+    const response = await this.integration.fetch(
+      `/v1/deployments/${this.deploymentId}/checks/${this.checkId}`,
       {
         body: JSON.stringify({
           conclusion: succeeded ? 'succeeded' : 'failed',
         }),
         headers: {
-          Authorization: `Bearer ${this.integration.accessToken}`,
           'content-type': 'application/json',
         },
         method: 'PATCH',
