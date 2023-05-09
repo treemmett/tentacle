@@ -1,4 +1,15 @@
-import { Accordion, Box, Button, Center, Code, Group, Loader, Modal, Text } from '@mantine/core';
+import {
+  Accordion,
+  Box,
+  Button,
+  Center,
+  Code,
+  Group,
+  Loader,
+  Modal,
+  Skeleton,
+  Text,
+} from '@mantine/core';
 import { IconBrandVercel } from '@tabler/icons-react';
 import { NextPage } from 'next';
 import dynamic from 'next/dynamic';
@@ -20,7 +31,7 @@ const DynamicTriggerForm = dynamic(
 );
 
 const Trigger: FC<{ trigger: TriggerDTO }> = ({ trigger }) => {
-  const { projects } = useVercel();
+  const { projects, isLoading } = useVercel();
 
   const name = useMemo(
     () => projects.find((p) => p.id === trigger.externalId)?.name,
@@ -40,7 +51,11 @@ const Trigger: FC<{ trigger: TriggerDTO }> = ({ trigger }) => {
         <Group>
           {icon}
           <Text>{type}</Text>
-          {name && <Code>{name}</Code>}
+          {(name || isLoading) && (
+            <Skeleton display="inline-block" visible={isLoading} w={50}>
+              <Code>{name}</Code>
+            </Skeleton>
+          )}
         </Group>
       </Accordion.Control>
       <Accordion.Panel>
@@ -54,7 +69,7 @@ const Trigger: FC<{ trigger: TriggerDTO }> = ({ trigger }) => {
 
 const Triggers: NextPage = () => {
   const [showForm, setShowForm] = useState(false);
-  const { triggers } = useTriggers();
+  const { triggers, isLoading } = useTriggers();
 
   return (
     <>
@@ -68,11 +83,20 @@ const Triggers: NextPage = () => {
         </Modal>
       )}
 
-      <Accordion>
-        {triggers.map((t) => (
-          <Trigger key={t.id} trigger={t} />
-        ))}
-      </Accordion>
+      {isLoading ? (
+        new Array(4).fill(null).map((_, i) => (
+          // eslint-disable-next-line react/no-array-index-key
+          <Skeleton key={i} mb="xl" visible>
+            <Box h="lg" />
+          </Skeleton>
+        ))
+      ) : (
+        <Accordion>
+          {triggers.map((t) => (
+            <Trigger key={t.id} trigger={t} />
+          ))}
+        </Accordion>
+      )}
     </>
   );
 };
