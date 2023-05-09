@@ -28,10 +28,11 @@ export default authenticatedNC().post(
     const data = await response.json();
 
     const integration = new VercelIntegration();
-    integration.id = data.installation_id;
+    integration.installationId = data.installation_id;
     integration.accessToken = data.access_token;
     integration.teamId = data.team_id;
     integration.userId = data.user_id;
+    integration.user = req.user;
     await integration.save();
 
     res.send({ ok: true });

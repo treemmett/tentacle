@@ -1,15 +1,27 @@
-import { BaseEntity, Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import type { User } from './User';
 import type { VercelCheck } from './VercelCheck';
 import { APIError, ProjectNotFound } from '@/utils/errors';
 import { logger } from '@/utils/logger';
 
 @Entity({ name: 'vercel_installations' })
 export class VercelIntegration extends BaseEntity {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn('uuid')
   public id: string;
 
   @Column()
   public accessToken: string;
+
+  @Column()
+  public installationId: string;
 
   @Column()
   public userId: string;
@@ -19,6 +31,10 @@ export class VercelIntegration extends BaseEntity {
 
   @OneToMany('vercel_checks', 'integration')
   public checks: VercelCheck[];
+
+  @OneToOne('users', 'vercel', { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn()
+  public user: User;
 
   public async getProject(id: string): Promise<GetVercelProjects[0]> {
     const response = await fetch(`https://api.vercel.com/v9/projects/${encodeURIComponent(id)}`, {
