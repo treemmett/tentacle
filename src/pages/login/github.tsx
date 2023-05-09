@@ -2,24 +2,19 @@ import { Center, Loader } from '@mantine/core';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
+import { api } from '@/utils/apiClient';
 
 const GitHubLogin: NextPage = () => {
   const { query } = useRouter();
 
   useEffect(() => {
     if (query.code) {
-      fetch('/api/login/oauth/github', {
-        body: JSON.stringify({ code: query.code }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-      })
-        .then((r) => r.json())
-        .then(({ token }) => {
+      api<{ token: string }>('POST', '/login/oauth/github', { code: query.code }).then(
+        ({ token }) => {
           localStorage.setItem('accessToken', token);
           window.close();
-        });
+        }
+      );
     }
   }, [query.code]);
 
