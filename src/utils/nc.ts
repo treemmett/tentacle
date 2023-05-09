@@ -16,6 +16,7 @@ export type ApiMiddleware = Middleware<NextApiRequest, NextApiResponse>;
 
 export interface AuthenticatedRequest extends NextApiRequest {
   octokit: Octokit;
+  user: User;
 }
 
 export function nc<Req extends NextApiRequest, Res extends NextApiResponse>() {
@@ -38,7 +39,9 @@ export function nc<Req extends NextApiRequest, Res extends NextApiResponse>() {
       res.status(500).send({ error: err });
     },
   })
-    .use(logHttp({ logger } as Options))
+    .use(
+      logHttp({ customProps: (req) => ({ body: (req as NextApiRequest).body }), logger } as Options)
+    )
     .use(connectToDatabase);
 }
 
@@ -71,6 +74,7 @@ export function authenticatedNC() {
     }
 
     req.octokit = new Octokit({ auth: user.githubToken.token });
+    req.user = user;
     next();
   });
 }
