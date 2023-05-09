@@ -18,7 +18,7 @@ export class VercelIntegration extends BaseEntity {
   public teamId?: string;
 
   @OneToMany('vercel_checks', 'integration')
-  public checks: VercelCheck;
+  public checks: VercelCheck[];
 
   public async getProject(id: string): Promise<GetVercelProjects[0]> {
     const response = await fetch(`https://api.vercel.com/v9/projects/${encodeURIComponent(id)}`, {
