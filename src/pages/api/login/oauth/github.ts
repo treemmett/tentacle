@@ -1,8 +1,11 @@
 import { Joi, celebrate } from 'celebrate';
-import { CompactEncrypt } from 'jose';
-import { App } from 'octokit';
+import { SignJWT } from 'jose';
+import { App, Octokit } from 'octokit';
+import { GithubUser } from '@/entities/GithubUser';
+import { User } from '@/entities/User';
 import { Config } from '@/utils/config';
-import { nc } from '@/utils/nc';
+import { logger } from '@/utils/logger';
+import { AuthenticatedRequest, nc } from '@/utils/nc';
 
 const GithubApp = new App({
   appId: Config.GITHUB_APP_ID,
@@ -19,16 +22,41 @@ export default nc().post(
       code: Joi.string().required(),
     },
   }),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     const { authentication } = await GithubApp.oauth.createToken({
       code: req.body.code,
     });
 
-    const token = await new CompactEncrypt(
-      new TextEncoder().encode(JSON.stringify({ token: authentication.token }))
-    )
-      .setProtectedHeader({ alg: 'A256KW', enc: 'A256GCM' })
-      .encrypt(Config.TOKEN_KEY);
+    req.octokit = new Octokit({ auth: authentication.token });
+
+    const githubUserRequest = await req.octokit.request('GET /user');
+
+    // find existing user first
+    let githubUser = await GithubUser.findOne({
+      relations: { user: true },
+      where: { id: githubUserRequest.data.id },
+    });
+
+    if (!githubUser) {
+      githubUser = new GithubUser();
+      githubUser.id = githubUserRequest.data.id;
+      githubUser.token = authentication.token;
+      githubUser.user = new User();
+      // TODO possible null email might break if the github user hasn't publicized their email
+      githubUser.user.email = githubUserRequest.data.email as string;
+      await User.insert(githubUser.user);
+      await GithubUser.insert(githubUser);
+    } else if (githubUser) {
+      githubUser.token = authentication.token;
+      await githubUser.save();
+    }
+
+    const token = await new SignJWT({})
+      .setSubject(githubUser.user.id)
+      .setProtectedHeader({ alg: 'HS256' })
+      .sign(Config.TOKEN_KEY);
+
+    logger.trace({ token }, 'token here');
 
     res.send({ token });
   }

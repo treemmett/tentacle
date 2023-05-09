@@ -1,5 +1,5 @@
 import { errors, isCelebrateError } from 'celebrate';
-import { compactDecrypt } from 'jose';
+import { jwtVerify } from 'jose';
 import { NextApiRequest, NextApiResponse } from 'next';
 import nextConnect, { Middleware } from 'next-connect';
 import { Octokit } from 'octokit';
@@ -8,6 +8,7 @@ import { Config } from './config';
 import { connectToDatabase } from './dataSource';
 import { APIError, AuthorizationError } from './errors';
 import { logger } from './logger';
+import { User } from '@/entities/User';
 
 const celebrateErrorHandler = errors();
 
@@ -53,14 +54,23 @@ export function authenticatedNC() {
       throw new AuthorizationError('No access token');
     }
 
-    try {
-      const { plaintext } = await compactDecrypt(accessToken, Config.TOKEN_KEY);
-      const { token } = JSON.parse(new TextDecoder().decode(plaintext));
-      req.octokit = new Octokit({ auth: token });
-      next();
-    } catch (err) {
-      console.error(err);
+    const jwt = await jwtVerify(accessToken, Config.TOKEN_KEY).catch((err) => {
+      logger.error(err, 'JWT verification failed');
       throw new AuthorizationError('Invalid access token');
+    });
+
+    const user = await User.createQueryBuilder('user')
+      .leftJoin('user.githubToken', 'github')
+      .select('user.id')
+      .addSelect('github.token')
+      .where('user.id = :id', { id: jwt.payload.sub })
+      .getOne();
+
+    if (!user) {
+      throw new AuthorizationError('User not found');
     }
+
+    req.octokit = new Octokit({ auth: user.githubToken.token });
+    next();
   });
 }
