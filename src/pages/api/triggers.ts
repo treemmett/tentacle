@@ -23,8 +23,7 @@ export default authenticatedNC()
     async (req, res) => {
       const { blocking, externalId, type } = req.body;
       // confirm the user has access to the project
-      // TODO relate to user somehow
-      const vercel = await VercelIntegration.findOne({ where: {} });
+      const vercel = await VercelIntegration.findOne({ where: { user: { id: req.user.id } } });
 
       if (!vercel) {
         throw new IntegrationNotFoundError('No vercel installation found');
