@@ -17,19 +17,21 @@ export async function api<TData>(
     body: data ? JSON.stringify(data) : undefined,
     headers,
     method,
-  }).then((r) => r.json());
+  });
 
-  if (response?.error) {
-    if (response.error.code) {
-      const found = Object.entries(Errors).find(([name]) => name === response.error.code);
+  const responseData = await response.json();
+
+  if (!response.ok || responseData?.error) {
+    if (responseData.error.code) {
+      const found = Object.entries(Errors).find(([name]) => name === responseData.error.code);
 
       if (found) {
-        throw new found[1](response.error.message, response.status);
+        throw new found[1](responseData.error.message, response.status);
       }
-    } else {
-      throw new Error(response.error.message);
     }
+
+    throw new Errors.APIError(responseData.error.message || 'An unknown error occurred');
   }
 
-  return response;
+  return responseData;
 }
