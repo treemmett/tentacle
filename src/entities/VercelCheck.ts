@@ -1,6 +1,6 @@
 import { BaseEntity, Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { v4 } from 'uuid';
-import { VercelInstallation } from './VercelIntegration';
+import { VercelIntegration } from './VercelIntegration';
 import type { CreatedWebhook, CreateCheckResponse } from '@/pages/api/vercel';
 import { APIError, IntegrationNotFoundError } from '@/utils/errors';
 import { logger } from '@/utils/logger';
@@ -19,13 +19,13 @@ export class VercelCheck extends BaseEntity {
   public deploymentId: string;
 
   @ManyToOne('vercel_installations', 'checks', { nullable: false, onDelete: 'CASCADE' })
-  public integration: VercelInstallation;
+  public integration: VercelIntegration;
 
   public static async createCheck(webhook: CreatedWebhook): Promise<VercelCheck> {
     const id = v4();
     logger.trace({ webhook }, 'Creating deployment checks', { id });
 
-    const vercel = await VercelInstallation.createQueryBuilder('vercel')
+    const vercel = await VercelIntegration.createQueryBuilder('vercel')
       .select('vercel.id')
       .addSelect('vercel.accessToken')
       .where('vercel.userId = :id', { id: webhook.payload.user.id })

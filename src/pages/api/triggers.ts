@@ -1,6 +1,6 @@
 import { Joi, celebrate } from 'celebrate';
 import { Trigger } from '@/entities/Trigger';
-import { VercelInstallation } from '@/entities/VercelIntegration';
+import { VercelIntegration } from '@/entities/VercelIntegration';
 import { TriggerType } from '@/lib/triggerType';
 import { IntegrationNotFoundError } from '@/utils/errors';
 import { authenticatedNC } from '@/utils/nc';
@@ -24,7 +24,7 @@ export default authenticatedNC()
       const { blocking, externalId, type } = req.body;
       // confirm the user has access to the project
       // TODO relate to user somehow
-      const vercel = await VercelInstallation.findOne({ where: {} });
+      const vercel = await VercelIntegration.findOne({ where: {} });
 
       if (!vercel) {
         throw new IntegrationNotFoundError('No vercel installation found');

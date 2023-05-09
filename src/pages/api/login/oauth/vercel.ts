@@ -1,5 +1,5 @@
 import { Joi, celebrate } from 'celebrate';
-import { VercelInstallation } from '@/entities/VercelIntegration';
+import { VercelIntegration } from '@/entities/VercelIntegration';
 import { Config } from '@/utils/config';
 import { AuthorizationError } from '@/utils/errors';
 import { authenticatedNC } from '@/utils/nc';
@@ -27,7 +27,7 @@ export default authenticatedNC().post(
 
     const data = await response.json();
 
-    const integration = new VercelInstallation();
+    const integration = new VercelIntegration();
     integration.id = data.installation_id;
     integration.accessToken = data.access_token;
     integration.teamId = data.team_id;

@@ -4,7 +4,7 @@ import { APIError, ProjectNotFound } from '@/utils/errors';
 import { logger } from '@/utils/logger';
 
 @Entity({ name: 'vercel_installations' })
-export class VercelInstallation extends BaseEntity {
+export class VercelIntegration extends BaseEntity {
   @PrimaryColumn()
   public id: string;
 

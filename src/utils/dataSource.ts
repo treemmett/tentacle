@@ -5,11 +5,11 @@ import { Config } from './config';
 import type { ApiMiddleware } from './nc';
 import { Trigger } from '@/entities/Trigger';
 import { VercelCheck } from '@/entities/VercelCheck';
-import { VercelInstallation } from '@/entities/VercelIntegration';
+import { VercelIntegration } from '@/entities/VercelIntegration';
 
 export const AppDataSource = new DataSource({
   database: Config.DB_DATABASE,
-  entities: [Trigger, VercelCheck, VercelInstallation],
+  entities: [Trigger, VercelCheck, VercelIntegration],
   host: Config.DB_HOST,
   migrations: [resolve(__dirname, './migrations/**')],
   password: Config.DB_PASSWORD,
