@@ -18,11 +18,15 @@ export default authenticatedNC()
         hooks: Joi.array()
           .items({
             blocking: Joi.boolean().default(false),
+            id: Joi.string().optional(),
+            repository: Joi.string().optional(),
             type: Joi.string()
               .required()
               .valid(...Object.values(HookType)),
+            workflow: Joi.string().optional(),
           })
           .min(1),
+        id: Joi.string().optional(),
         type: Joi.string()
           .required()
           .valid(...Object.values(TriggerType)),

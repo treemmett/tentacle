@@ -48,6 +48,8 @@ export class Trigger extends BaseEntity {
         hook.blocking = h.blocking;
         hook.type = h.type;
         hook.trigger = trigger;
+        hook.repository = h.repository;
+        hook.workflow = h.workflow;
         await Hook.insert(hook);
         delete hook.trigger;
         return hook;

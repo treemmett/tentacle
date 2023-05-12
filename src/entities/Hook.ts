@@ -15,6 +15,12 @@ export class Hook extends BaseEntity {
 
   @Column({ default: false })
   public blocking: boolean;
+
+  @Column({ nullable: true })
+  public repository?: string;
+
+  @Column({ nullable: true })
+  public workflow?: string;
 }
 
 export type HookDTO = Omit<Hook, keyof BaseEntity | 'trigger'>;

@@ -51,16 +51,23 @@ const DynamicVercelIntegrationForm = dynamic(
   }
 );
 
+const DynamicGithubForm = dynamic(
+  () => import('./GithubActionHookForm').then((m) => m.GithubActionHookForm),
+  {
+    loading: () => (
+      <Center>
+        <Loader />
+      </Center>
+    ),
+  }
+);
+
 export interface TriggerFormValues {
   type: TriggerType;
   vercel: {
     project: string;
   };
-  hooks: {
-    blocking: boolean;
-    id: string;
-    type: HookType;
-  }[];
+  hooks: HookDTO[];
 }
 
 const HookForm: FC<{
@@ -91,6 +98,10 @@ const HookForm: FC<{
         {...form.getInputProps(`hooks.${index}.type`)}
       />
 
+      {form.values.hooks[index].type === HookType.github_action && (
+        <DynamicGithubForm disabled={disabled} form={form} index={index} />
+      )}
+
       <Flex justify="space-between">
         <Chip disabled={disabled} {...form.getInputProps(`hooks.${index}.blocking`)}>
           Blocking
@@ -118,6 +129,7 @@ export const TriggerForm: FC<Pick<ModalProps, 'onClose'>> = ({ onClose }) => {
         {
           blocking: false,
           id: randomId(),
+          repository: '',
           type: '' as HookType,
         } as HookDTO,
       ],
@@ -128,8 +140,22 @@ export const TriggerForm: FC<Pick<ModalProps, 'onClose'>> = ({ onClose }) => {
     },
     validate: {
       hooks: {
+        repository: (value, values, path) => {
+          const hookIndex = parseInt(path.split('.')[1], 10);
+          if (values.hooks[hookIndex].type === HookType.github_action) {
+            if (!value) return 'Repository is required';
+          }
+          return null;
+        },
         type: (value) => {
           if (!value) return 'Hook type is required';
+          return null;
+        },
+        workflow: (value, values, path) => {
+          const hookIndex = parseInt(path.split('.')[1], 10);
+          if (values.hooks[hookIndex].type === HookType.github_action) {
+            if (!value) return 'Workflow is required';
+          }
           return null;
         },
       },
@@ -167,11 +193,7 @@ export const TriggerForm: FC<Pick<ModalProps, 'onClose'>> = ({ onClose }) => {
         try {
           setSubmitting(true);
           if (v.type === TriggerType.vercel_deployment) {
-            await createTrigger(
-              v.type,
-              v.vercel.project,
-              v.hooks.map(({ blocking, type }) => ({ blocking, type } as Omit<HookDTO, 'id'>))
-            );
+            await createTrigger(v.type, v.vercel.project, v.hooks);
           }
 
           onClose();
