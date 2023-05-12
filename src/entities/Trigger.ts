@@ -30,6 +30,8 @@ export class Trigger extends BaseEntity {
       .addSelect('hook.id')
       .addSelect('hook.type')
       .addSelect('hook.blocking')
+      .addSelect('hook.repository')
+      .addSelect('hook.workflow')
       .where('user.id = :id', { id: user.id })
       .getMany();
 

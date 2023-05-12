@@ -65,9 +65,9 @@ const Trigger: FC<{ trigger: TriggerDTO }> = ({ trigger }) => {
       </Accordion.Control>
       <Accordion.Panel>
         {trigger.hooks.map((h) => (
-          <Paper key={h.id} mt="lg" pl="xl" py="md" withBorder>
-            <Flex>
-              <Flex align="center" justify="center" mr="lg">
+          <Paper component={Group} key={h.id} mt="lg" pl="xl" py="md" withBorder>
+            <Group>
+              <Flex align="center" justify="center">
                 {hookIcon(h.type)}
               </Flex>
               <Text>{hookName(h.type)}</Text>
@@ -76,7 +76,6 @@ const Trigger: FC<{ trigger: TriggerDTO }> = ({ trigger }) => {
                   <ThemeIcon
                     aria-label="Blocks supported triggers until success"
                     color="green"
-                    ml="lg"
                     sx={{ cursor: 'help' }}
                     variant="light"
                   >
@@ -84,7 +83,9 @@ const Trigger: FC<{ trigger: TriggerDTO }> = ({ trigger }) => {
                   </ThemeIcon>
                 </Tooltip>
               )}
-            </Flex>
+              {h.repository && <Code>{h.repository}</Code>}
+              {h.workflow && <Code>{h.workflow}</Code>}
+            </Group>
           </Paper>
         ))}
       </Accordion.Panel>
