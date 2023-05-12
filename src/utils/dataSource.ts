@@ -4,6 +4,7 @@ import { DataSource } from 'typeorm';
 import { Config } from './config';
 import type { ApiMiddleware } from './nc';
 import { GithubUser } from '@/entities/GithubUser';
+import { Hook } from '@/entities/Hook';
 import { Trigger } from '@/entities/Trigger';
 import { User } from '@/entities/User';
 import { VercelCheck } from '@/entities/VercelCheck';
@@ -11,7 +12,7 @@ import { VercelIntegration } from '@/entities/VercelIntegration';
 
 export const AppDataSource = new DataSource({
   database: Config.DB_DATABASE,
-  entities: [GithubUser, Trigger, User, VercelCheck, VercelIntegration],
+  entities: [GithubUser, Hook, Trigger, User, VercelCheck, VercelIntegration],
   host: Config.DB_HOST,
   migrations: [resolve(__dirname, './migrations/**')],
   password: Config.DB_PASSWORD,

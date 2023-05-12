@@ -1,4 +1,4 @@
-import { Button, Center, Checkbox, Loader, Select, Text } from '@mantine/core';
+import { Button, Center, Loader, Select, Text } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { IconBrandVercel } from '@tabler/icons-react';
 import { FC } from 'react';
@@ -6,9 +6,10 @@ import type { TriggerFormValues } from './TriggerForm';
 import { useVercel } from '@/lib/vercel';
 import { IntegrationNotFoundError } from '@/utils/errors';
 
-export const VercelIntegrationForm: FC<{ form: UseFormReturnType<TriggerFormValues> }> = ({
-  form,
-}) => {
+export const VercelIntegrationForm: FC<{
+  disabled?: boolean;
+  form: UseFormReturnType<TriggerFormValues>;
+}> = ({ disabled, form }) => {
   const { error, isLoading, projects } = useVercel();
 
   if (error instanceof IntegrationNotFoundError) {
@@ -41,17 +42,12 @@ export const VercelIntegrationForm: FC<{ form: UseFormReturnType<TriggerFormValu
   }
 
   return (
-    <>
-      <Select
-        data={projects.map((p) => ({ label: p.name, value: p.id }))}
-        label="Project"
-        withinPortal
-        {...form.getInputProps('vercel.project')}
-      />
-      <Checkbox
-        label="Block production promotion if hooks fail"
-        {...form.getInputProps('vercel.blocking')}
-      />
-    </>
+    <Select
+      data={projects.map((p) => ({ label: p.name, value: p.id }))}
+      disabled={disabled}
+      label="Project"
+      withinPortal
+      {...form.getInputProps('vercel.project')}
+    />
   );
 };

@@ -36,3 +36,9 @@ export class ProjectNotFound extends APIError {
     super(message, 404);
   }
 }
+
+export class VercelCommunicationError extends APIError {
+  constructor(public message = 'Error communicating with Vercel') {
+    super(message, 502);
+  }
+}

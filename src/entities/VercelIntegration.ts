@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import type { User } from './User';
 import type { VercelCheck } from './VercelCheck';
-import { APIError, ProjectNotFound } from '@/utils/errors';
+import { APIError, ProjectNotFound, VercelCommunicationError } from '@/utils/errors';
 import { logger } from '@/utils/logger';
 
 @Entity({ name: 'vercel_installations' })
@@ -43,6 +43,9 @@ export class VercelIntegration extends BaseEntity {
         authorization: `Bearer ${this.accessToken}`,
         ...init?.headers,
       },
+    }).catch((err) => {
+      logger.error(err, 'Vercel error');
+      throw new VercelCommunicationError();
     });
   }
 

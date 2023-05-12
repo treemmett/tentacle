@@ -1,6 +1,7 @@
 import { Joi, celebrate } from 'celebrate';
 import { Trigger } from '@/entities/Trigger';
 import { VercelIntegration } from '@/entities/VercelIntegration';
+import { HookType } from '@/lib/hookType';
 import { TriggerType } from '@/lib/triggerType';
 import { IntegrationNotFoundError } from '@/utils/errors';
 import { authenticatedNC } from '@/utils/nc';
@@ -13,15 +14,22 @@ export default authenticatedNC()
   .post(
     celebrate({
       body: {
-        blocking: Joi.boolean(),
         externalId: Joi.string(),
+        hooks: Joi.array()
+          .items({
+            blocking: Joi.boolean().default(false),
+            type: Joi.string()
+              .required()
+              .valid(...Object.values(HookType)),
+          })
+          .min(1),
         type: Joi.string()
           .required()
           .valid(...Object.values(TriggerType)),
       },
     }),
     async (req, res) => {
-      const { blocking, externalId, type } = req.body;
+      const { externalId, hooks, type } = req.body;
       // confirm the user has access to the project
       const vercel = await VercelIntegration.findOne({ where: { user: { id: req.user.id } } });
 
@@ -31,7 +39,7 @@ export default authenticatedNC()
 
       const project = await vercel.getProject(externalId);
 
-      const trigger = await Trigger.createTrigger(type, project.id, blocking);
+      const trigger = await Trigger.createTrigger(type, project.id, hooks);
 
       res.send(trigger);
     }
