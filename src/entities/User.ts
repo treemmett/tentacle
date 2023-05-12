@@ -3,10 +3,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import type { GithubUser } from './GithubUser';
+import type { Trigger } from './Trigger';
 import type { VercelIntegration } from './VercelIntegration';
 
 @Entity({ name: 'users' })
@@ -25,4 +27,7 @@ export class User extends BaseEntity {
 
   @OneToOne('vercel_installations', 'user')
   public vercel: VercelIntegration;
+
+  @OneToMany('triggers', 'user')
+  public triggers: Trigger[];
 }

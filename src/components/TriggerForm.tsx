@@ -15,10 +15,11 @@ import {
 } from '@mantine/core';
 import { UseFormReturnType, useForm } from '@mantine/form';
 import { randomId } from '@mantine/hooks';
-import { IconBrandGithub, IconBrandVercel, IconTrash, IconWebhook } from '@tabler/icons-react';
+import { IconBrandVercel, IconTrash } from '@tabler/icons-react';
 import dynamic from 'next/dynamic';
 import { FC, forwardRef, useState } from 'react';
 import type { HookDTO } from '@/entities/Hook';
+import { hookIcon, hookName } from '@/lib/hook';
 import { HookType } from '@/lib/hookType';
 import { TriggerType } from '@/lib/triggerType';
 import { useTriggers } from '@/lib/triggers';
@@ -66,64 +67,47 @@ const HookForm: FC<{
   disabled?: boolean;
   form: UseFormReturnType<TriggerFormValues>;
   index: number;
-}> = ({ disabled, form, index }) => {
-  const githubIcon = <IconBrandGithub size="1rem" stroke={2} />;
-  const webhookIcon = <IconWebhook size="1rem" stroke={2} />;
+}> = ({ disabled, form, index }) => (
+  <Paper p="md" withBorder>
+    <Stack>
+      <Select
+        data={[
+          {
+            icon: hookIcon(HookType.github_action),
+            label: hookName(HookType.github_action),
+            value: HookType.github_action,
+          },
+          {
+            icon: hookIcon(HookType.webhook),
+            label: hookName(HookType.webhook),
+            value: HookType.webhook,
+          },
+        ]}
+        disabled={disabled}
+        icon={hookIcon(form.values.hooks[index].type)}
+        itemComponent={SelectItem}
+        label="Type"
+        withinPortal
+        {...form.getInputProps(`hooks.${index}.type`)}
+      />
 
-  let icon: JSX.Element | null = null;
-  switch (form.values.hooks[index].type) {
-    case HookType.github_action:
-      icon = githubIcon;
-      break;
-    case HookType.webhook:
-      icon = webhookIcon;
-      break;
-    default:
-      break;
-  }
-
-  return (
-    <Paper p="md" withBorder>
-      <Stack>
-        <Select
-          data={[
-            {
-              icon: githubIcon,
-              label: 'GitHub Action',
-              value: HookType.github_action,
-            },
-            {
-              icon: webhookIcon,
-              label: 'Webhook',
-              value: HookType.webhook,
-            },
-          ]}
-          disabled={disabled}
-          icon={icon}
-          itemComponent={SelectItem}
-          label="Type"
-          withinPortal
-          {...form.getInputProps(`hooks.${index}.type`)}
-        />
-
-        <Flex justify="space-between">
-          <Chip disabled={disabled} {...form.getInputProps(`hooks.${index}.blocking`)}>
-            Blocking
-          </Chip>
-          {form.values.hooks.length > 1 && (
-            <ActionIcon
-              color="red"
-              disabled={disabled}
-              onClick={() => form.removeListItem('hooks', index)}
-            >
-              <IconTrash size="1rem" />
-            </ActionIcon>
-          )}
-        </Flex>
-      </Stack>
-    </Paper>
-  );
-};
+      <Flex justify="space-between">
+        <Chip disabled={disabled} {...form.getInputProps(`hooks.${index}.blocking`)}>
+          Blocking
+        </Chip>
+        {form.values.hooks.length > 1 && (
+          <ActionIcon
+            color="red"
+            disabled={disabled}
+            onClick={() => form.removeListItem('hooks', index)}
+          >
+            <IconTrash size="1rem" />
+          </ActionIcon>
+        )}
+      </Flex>
+    </Stack>
+  </Paper>
+);
 
 export const TriggerForm: FC<Pick<ModalProps, 'onClose'>> = ({ onClose }) => {
   const { createTrigger } = useTriggers();
@@ -142,25 +126,25 @@ export const TriggerForm: FC<Pick<ModalProps, 'onClose'>> = ({ onClose }) => {
         project: '',
       },
     },
-    // validate: {
-    //   hooks: {
-    //     type: (value) => {
-    //       if (!value) return 'Hook type is required';
-    //       return null;
-    //     },
-    //   },
-    //   type: (value) => {
-    //     if (!value) return 'Trigger type is required';
-    //     return null;
-    //   },
-    //   vercel: {
-    //     project: (value, values) => {
-    //       if (values.type !== TriggerType.vercel_deployment) return null;
-    //       if (!value) return 'Project is required';
-    //       return null;
-    //     },
-    //   },
-    // },
+    validate: {
+      hooks: {
+        type: (value) => {
+          if (!value) return 'Hook type is required';
+          return null;
+        },
+      },
+      type: (value) => {
+        if (!value) return 'Trigger type is required';
+        return null;
+      },
+      vercel: {
+        project: (value, values) => {
+          if (values.type !== TriggerType.vercel_deployment) return null;
+          if (!value) return 'Project is required';
+          return null;
+        },
+      },
+    },
   });
 
   const vercelIcon = <IconBrandVercel size="1rem" stroke={2} />;

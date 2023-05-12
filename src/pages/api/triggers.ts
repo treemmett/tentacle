@@ -8,7 +8,7 @@ import { authenticatedNC } from '@/utils/nc';
 
 export default authenticatedNC()
   .get(async (req, res) => {
-    const triggers = await Trigger.getAll();
+    const triggers = await Trigger.getAll(req.user);
     res.send(triggers);
   })
   .post(
@@ -39,7 +39,7 @@ export default authenticatedNC()
 
       const project = await vercel.getProject(externalId);
 
-      const trigger = await Trigger.createTrigger(type, project.id, hooks);
+      const trigger = await Trigger.createTrigger(req.user, type, project.id, hooks);
 
       res.send(trigger);
     }

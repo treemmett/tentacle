@@ -4,17 +4,22 @@ import {
   Button,
   Center,
   Code,
+  Flex,
   Group,
   Loader,
   Modal,
+  Paper,
   Skeleton,
   Text,
+  ThemeIcon,
+  Tooltip,
 } from '@mantine/core';
-import { IconBrandVercel } from '@tabler/icons-react';
+import { IconBrandVercel, IconShieldCheck } from '@tabler/icons-react';
 import { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 import { FC, useMemo, useState } from 'react';
 import type { Trigger as TriggerDTO } from '@/entities/Trigger';
+import { hookIcon, hookName } from '@/lib/hook';
 import { TriggerType } from '@/lib/triggerType';
 import { useTriggers } from '@/lib/triggers';
 import { useVercel } from '@/lib/vercel';
@@ -59,9 +64,29 @@ const Trigger: FC<{ trigger: TriggerDTO }> = ({ trigger }) => {
         </Group>
       </Accordion.Control>
       <Accordion.Panel>
-        <Box>a</Box>
-        <Box>b</Box>
-        <Box>c</Box>
+        {trigger.hooks.map((h) => (
+          <Paper key={h.id} mt="lg" pl="xl" py="md" withBorder>
+            <Flex>
+              <Flex align="center" justify="center" mr="lg">
+                {hookIcon(h.type)}
+              </Flex>
+              <Text>{hookName(h.type)}</Text>
+              {h.blocking && (
+                <Tooltip label="Blocks supported triggers until success">
+                  <ThemeIcon
+                    aria-label="Blocks supported triggers until success"
+                    color="green"
+                    ml="lg"
+                    sx={{ cursor: 'help' }}
+                    variant="light"
+                  >
+                    <IconShieldCheck size="1rem" stroke={2} />
+                  </ThemeIcon>
+                </Tooltip>
+              )}
+            </Flex>
+          </Paper>
+        ))}
       </Accordion.Panel>
     </Accordion.Item>
   );

@@ -1,5 +1,6 @@
-import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Hook, HookDTO } from './Hook';
+import type { User } from './User';
 import { TriggerType } from '@/lib/triggerType';
 
 @Entity({ name: 'triggers' })
@@ -13,20 +14,32 @@ export class Trigger extends BaseEntity {
   @Column()
   public externalId: string;
 
-  @Column({ default: false })
-  public blocking: boolean;
-
   @OneToMany('hooks', 'trigger')
   public hooks: Hook[];
 
-  public static async getAll() {
-    const triggers = await Trigger.find({ where: {} });
+  @ManyToOne('users', 'triggers')
+  public user: User;
+
+  public static async getAll(user: User) {
+    const triggers = Trigger.createQueryBuilder('trigger')
+      .leftJoin('trigger.user', 'user')
+      .leftJoin('trigger.hooks', 'hook')
+      .select('trigger.id')
+      .addSelect('trigger.type')
+      .addSelect('trigger.externalId')
+      .addSelect('hook.id')
+      .addSelect('hook.type')
+      .addSelect('hook.blocking')
+      .where('user.id = :id', { id: user.id })
+      .getMany();
+
     return triggers;
   }
 
-  public static async createTrigger(type: TriggerType, id: string, hooks: HookDTO[]) {
+  public static async createTrigger(user: User, type: TriggerType, id: string, hooks: HookDTO[]) {
     const trigger = new Trigger();
     trigger.type = type;
+    trigger.user = user;
     trigger.externalId = id;
     await Trigger.insert(trigger);
     trigger.hooks = await Promise.all(
