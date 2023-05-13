@@ -41,6 +41,7 @@ export class VercelIntegration extends BaseEntity {
       ...init,
       headers: {
         authorization: `Bearer ${this.accessToken}`,
+        'content-type': 'application/json',
         ...init?.headers,
       },
     }).catch((err) => {

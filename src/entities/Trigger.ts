@@ -1,7 +1,9 @@
 import { BaseEntity, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Hook, HookDTO } from './Hook';
 import type { User } from './User';
+import { VercelIntegration } from './VercelIntegration';
 import { TriggerType } from '@/lib/triggerType';
+import { BadInputError } from '@/utils/errors';
 
 @Entity({ name: 'triggers' })
 export class Trigger extends BaseEntity {
@@ -13,6 +15,9 @@ export class Trigger extends BaseEntity {
 
   @Column()
   public externalId: string;
+
+  @ManyToOne('vercel_installations', 'triggers', { onDelete: 'CASCADE' })
+  public vercel: VercelIntegration;
 
   @OneToMany('hooks', 'trigger')
   public hooks: Hook[];
@@ -43,6 +48,18 @@ export class Trigger extends BaseEntity {
     trigger.type = type;
     trigger.user = user;
     trigger.externalId = id;
+
+    switch (type) {
+      case TriggerType.vercel_deployment:
+        trigger.vercel = await VercelIntegration.findOneOrFail({
+          where: { user: { id: user.id } },
+        });
+        break;
+
+      default:
+        throw new BadInputError('Unknown trigger type');
+    }
+
     await Trigger.insert(trigger);
     trigger.hooks = await Promise.all(
       hooks.map(async (h) => {

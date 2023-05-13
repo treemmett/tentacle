@@ -42,3 +42,9 @@ export class VercelCommunicationError extends APIError {
     super(message, 502);
   }
 }
+
+export class BadInputError extends APIError {
+  constructor(public message = 'Bad input') {
+    super(message, 400);
+  }
+}

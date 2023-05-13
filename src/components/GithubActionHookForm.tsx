@@ -47,7 +47,7 @@ export const GithubActionHookForm: FC<{
 }> = ({ disabled, form, index }) => {
   const { repos, isLoading } = useRepos();
   const { workflows, isLoading: repoLoading } = useRepo(
-    ...(form.values.hooks[index].repository?.split('/') as [string, string])
+    ...((form.values.hooks[index]?.repository?.split('/') || '') as [string, string])
   );
 
   if (isLoading)

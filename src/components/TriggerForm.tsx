@@ -129,7 +129,6 @@ export const TriggerForm: FC<Pick<ModalProps, 'onClose'>> = ({ onClose }) => {
         {
           blocking: false,
           id: randomId(),
-          repository: '',
           type: '' as HookType,
         } as HookDTO,
       ],

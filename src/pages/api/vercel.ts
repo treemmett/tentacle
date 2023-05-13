@@ -1,6 +1,8 @@
 import { createHmac } from 'crypto';
 import getRawBody from 'raw-body';
+import { Trigger } from '@/entities/Trigger';
 import { VercelCheck } from '@/entities/VercelCheck';
+import { TriggerType } from '@/lib/triggerType';
 import { Config } from '@/utils/config';
 import { UnauthorizedError } from '@/utils/errors';
 import { logger } from '@/utils/logger';
@@ -24,7 +26,25 @@ export default nc().post(async (req, res) => {
 
   switch (webhook.type) {
     case 'deployment.created': {
-      await VercelCheck.createCheck(webhook);
+      const triggers = await Trigger.createQueryBuilder('trigger')
+        .leftJoin('trigger.hooks', 'hook')
+        .leftJoin('trigger.vercel', 'vercel')
+        .select('trigger.id')
+        .addSelect('hook.id')
+        .addSelect('hook.type')
+        .addSelect('hook.blocking')
+        .addSelect('hook.repository')
+        .addSelect('hook.workflow')
+        .addSelect('vercel.id')
+        .addSelect('vercel.accessToken')
+        .where('trigger.externalId = :id', { id: webhook.payload.project.id })
+        .andWhere('trigger.type = :type', { type: TriggerType.vercel_deployment })
+        .getMany();
+
+      await Promise.all(
+        triggers.map((t) => VercelCheck.createChecks(t, webhook.payload.deployment.id))
+      );
+
       res.end();
       break;
     }
