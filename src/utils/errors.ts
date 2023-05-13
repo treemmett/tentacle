@@ -48,3 +48,9 @@ export class BadInputError extends APIError {
     super(message, 400);
   }
 }
+
+export class GithubError extends APIError {
+  constructor(public message = 'Error communicating with GitHub') {
+    super(message, 502);
+  }
+}

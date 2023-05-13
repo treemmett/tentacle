@@ -51,25 +51,16 @@ export default nc().post(async (req, res) => {
 
     case 'deployment.ready': {
       logger.trace({ webhook }, 'Deployment ready');
-
-      const checks = await VercelCheck.find({
-        relations: { integration: true },
-        where: { deploymentId: webhook.payload.deployment.id },
-      });
-
-      await Promise.all(checks.map((c) => c.updateCheck(false)));
+      await VercelCheck.runHooks(webhook.payload.deployment.id);
+      res.end();
       break;
     }
 
     // cspell:word rerequested
     case 'deployment.check-rerequested': {
       logger.trace({ webhook }, 'Re-running checks');
-
-      const checks = await VercelCheck.find({
-        relations: { integration: true },
-        where: { deploymentId: webhook.payload.deployment.id },
-      });
-      await Promise.all(checks.map((c) => c.updateCheck(true)));
+      await VercelCheck.runHooks(webhook.payload.deployment.id);
+      res.end();
       break;
     }
 

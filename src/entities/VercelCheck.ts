@@ -1,5 +1,6 @@
 import { BaseEntity, Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { v4 } from 'uuid';
+import { Hook } from './Hook';
 import { Trigger } from './Trigger';
 import { VercelIntegration } from './VercelIntegration';
 import { HookType } from '@/lib/hookType';
@@ -19,6 +20,9 @@ export class VercelCheck extends BaseEntity {
   @Column()
   @Index()
   public deploymentId: string;
+
+  @ManyToOne('hooks', { onDelete: 'CASCADE' })
+  public hook: Hook;
 
   @ManyToOne('vercel_installations', 'checks', { nullable: false, onDelete: 'CASCADE' })
   public integration: VercelIntegration;
@@ -76,6 +80,7 @@ export class VercelCheck extends BaseEntity {
           check.id = id;
           check.deploymentId = responseData.deploymentId;
           check.checkId = responseData.id;
+          check.hook = hook;
           check.integration = trigger.vercel;
           await VercelCheck.insert(check);
           return check;
@@ -89,6 +94,39 @@ export class VercelCheck extends BaseEntity {
     return checks.filter(Boolean) as VercelCheck[];
   }
 
+  public static async runHooks(deploymentId: string) {
+    const checks = await VercelCheck.createQueryBuilder('check')
+      .leftJoinAndSelect('check.hook', 'hook')
+      .leftJoinAndSelect('check.integration', 'integration')
+      .leftJoinAndSelect('hook.trigger', 'trigger')
+      .leftJoinAndSelect('trigger.user', 'user')
+      .leftJoinAndSelect('user.githubToken', 'github')
+      .addSelect('github.token')
+      .where('check.deploymentId = :id', { id: deploymentId })
+      .getMany();
+
+    await Promise.all(
+      checks.map(async (check) => {
+        await check.integration.fetch(
+          `/v1/deployments/${check.deploymentId}/checks/${check.checkId}`,
+          {
+            body: JSON.stringify({
+              status: 'running',
+            }),
+            headers: {
+              'content-type': 'application/json',
+            },
+            method: 'PATCH',
+          }
+        );
+        await check.hook.run().catch(async (err) => {
+          logger.error({ check: this, err }, 'Hook run failed');
+          await check.updateCheck(false);
+        });
+      })
+    );
+  }
+
   public async updateCheck(succeeded: boolean) {
     logger.trace(this, 'Updating checks');
     const response = await this.integration.fetch(
@@ -96,6 +134,7 @@ export class VercelCheck extends BaseEntity {
       {
         body: JSON.stringify({
           conclusion: succeeded ? 'succeeded' : 'failed',
+          status: 'completed',
         }),
         headers: {
           'content-type': 'application/json',
