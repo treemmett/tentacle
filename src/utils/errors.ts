@@ -27,7 +27,7 @@ export class RepositoryNotFoundError extends APIError {
 
 export class UnauthorizedError extends APIError {
   constructor(public message = 'Unauthorized request') {
-    super(message, 403);
+    super(message, 401);
   }
 }
 
