@@ -21,13 +21,20 @@ export class VercelCheck extends BaseEntity {
   @Index()
   public deploymentId: string;
 
+  @Column()
+  public deploymentUrl: string;
+
   @ManyToOne('hooks', { onDelete: 'CASCADE' })
   public hook: Hook;
 
   @ManyToOne('vercel_installations', 'checks', { nullable: false, onDelete: 'CASCADE' })
   public integration: VercelIntegration;
 
-  public static async createChecks(trigger: Trigger, deploymentId: string): Promise<VercelCheck[]> {
+  public static async createChecks(
+    trigger: Trigger,
+    deploymentId: string,
+    deploymentUrl: string
+  ): Promise<VercelCheck[]> {
     logger.trace({ trigger }, 'Creating deployment checks');
 
     const checks = await Promise.all(
@@ -79,6 +86,7 @@ export class VercelCheck extends BaseEntity {
           const check = new VercelCheck();
           check.id = id;
           check.deploymentId = responseData.deploymentId;
+          check.deploymentUrl = deploymentUrl;
           check.checkId = responseData.id;
           check.hook = hook;
           check.integration = trigger.vercel;
@@ -102,6 +110,7 @@ export class VercelCheck extends BaseEntity {
       .leftJoinAndSelect('trigger.user', 'user')
       .leftJoinAndSelect('user.githubToken', 'github')
       .addSelect('github.token')
+      .addSelect('check.deploymentUrl')
       .where('check.deploymentId = :id', { id: deploymentId })
       .getMany();
 
@@ -119,12 +128,14 @@ export class VercelCheck extends BaseEntity {
             method: 'PATCH',
           }
         );
-        await check.hook.run().catch(async (err) => {
+        await check.hook.run(check.deploymentUrl, check).catch(async (err) => {
           logger.error({ check: this, err }, 'Hook run failed');
           await check.updateCheck(false);
         });
       })
-    );
+    ).catch((err) => {
+      logger.error({ err }, 'Hook run failed');
+    });
   }
 
   public async updateCheck(succeeded: boolean) {
@@ -145,7 +156,7 @@ export class VercelCheck extends BaseEntity {
 
     if (!response.ok) {
       logger.error({ response: await response.json(), ...this }, 'Check update failed');
-      throw new APIError('Check registration failed');
+      throw new APIError('Check update failed');
     }
   }
 }

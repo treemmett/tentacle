@@ -1,7 +1,10 @@
+import { SignJWT } from 'jose';
 import { Octokit } from 'octokit';
 import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import type { Trigger } from './Trigger';
+import type { VercelCheck } from './VercelCheck';
 import { HookType } from '@/lib/hookType';
+import { Config } from '@/utils/config';
 import { BadInputError, GithubError, IntegrationNotFoundError } from '@/utils/errors';
 import { logger } from '@/utils/logger';
 
@@ -25,7 +28,15 @@ export class Hook extends BaseEntity {
   @Column({ nullable: true })
   public workflow?: string;
 
-  public async run() {
+  public async run(deploymentUrl: string, check?: VercelCheck) {
+    const token = await new SignJWT({ cid: check?.id, hid: this.id })
+      .setIssuedAt()
+      .setExpirationTime('1h')
+      .setProtectedHeader({ alg: 'HS256' })
+      .sign(Config.TOKEN_KEY);
+
+    const callbackUrl = `${Config.BASE_URL}/api/check/callback/${token}`;
+
     switch (this.type) {
       case HookType.github_action: {
         if (!this.trigger.user?.githubToken) {
@@ -45,6 +56,10 @@ export class Hook extends BaseEntity {
         const [owner, repo] = this.repository.split('/');
         await octokit
           .request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
+            inputs: {
+              callback_url: callbackUrl,
+              deployment_url: deploymentUrl,
+            },
             owner,
             ref: 'main',
             repo,

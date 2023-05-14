@@ -42,7 +42,9 @@ export default nc().post(async (req, res) => {
         .getMany();
 
       await Promise.all(
-        triggers.map((t) => VercelCheck.createChecks(t, webhook.payload.deployment.id))
+        triggers.map((t) =>
+          VercelCheck.createChecks(t, webhook.payload.deployment.id, webhook.payload.deployment.url)
+        )
       );
 
       res.end();

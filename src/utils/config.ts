@@ -2,6 +2,8 @@ import { createSecretKey, randomBytes } from 'crypto';
 import { PublicConfig } from './publicConfig';
 
 export class Config extends PublicConfig {
+  public static readonly BASE_URL = process.env.BASE_URL;
+
   public static readonly DB_CERTIFICATE = process.env.DB_CERTIFICATE;
 
   public static readonly DB_DATABASE = process.env.DB_DATABASE || 'tentacle';
